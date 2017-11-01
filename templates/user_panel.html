@@ -1,0 +1,14 @@
+<html>
+    <head>
+        <title>User Panel</title>
+    </head>
+    <body>
+        <h1>User Panel</h1>
+        <form method="POST">
+            {{ form.hidden_tag() }}
+            {{ form.channel_name.label }}: {{ form.channel_name() }} {% for error in form.channel_name.errors %}{{ error }}{% endfor %}<br>
+            {{ form.nickname.label }}: {{ form.nickname() }} {% for error in form.nickname.errors %}{{ error }}{% endfor %}<br>
+            {{ form.submit() }}
+        </form>
+    </body>
+</html>
