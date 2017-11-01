@@ -3,15 +3,19 @@ from flask_socketio import SocketIO, send,emit, join_room, leave_room
 from flask_wtf import Form
 from wtforms.fields import StringField, SubmitField,PasswordField
 from wtforms.validators import Required
+from flask_sqlalchemy import SQLAlchemy
+from flask_login import LoginManager,UserMixin,login_user,login_required,logout_user
+
+
 
 class LoginForm(Form):
-    """Accepts a nickname and a password."""
+    """Accepts a name and a password."""
     name = StringField('Name', validators=[Required()])
     password = PasswordField('Password', validators=[Required()])
     submit = SubmitField('Sign in')
 
 class ChannelForm(Form):
-    """Accepts a nickname and a password."""
+    """Accepts a channel_name and a nickname."""
     channel_name = StringField('Channel Name', validators=[Required()])
     nickname = StringField('Nick Name', validators=[Required()])
     submit = SubmitField('Join')
@@ -19,22 +23,43 @@ class ChannelForm(Form):
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'ChannelX'
-socketio = SocketIO(app)
-"""
-@socketio.on('message')
-def handleMessage(msg):
-	print('Message: ' + msg)
-	send(msg, broadcast=True)
+app.config['SQLALCHEMY_DATABASE_URI']='sqlite:////home/ubuntu/Desktop/ChannelX/login.db'
+db=SQLAlchemy(app)
+login_manager=LoginManager()
+login_manager.init_app(app)
 
-@socketio.on('join')
-def join()
-"""
+class User(UserMixin,db.Model):
+    id=db.Column(db.Integer,primary_key=True)
+    username=db.Column(db.String(20),unique=True)
+    password=db.Column(db.String(20))
+
+
+
+
+
+socketio = SocketIO(app)
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
 
 @app.route('/',methods=['GET','POST'])
 def get_login():
     print("Get Login")
     form = LoginForm()
     if form.validate_on_submit():
+        user=User.query.filter_by(username=form.name.data).first()
+        print("username"+str(user))
+        if not user:
+            new_user=User(username=form.name.data,password=form.password.data)
+            db.session.add(new_user)
+            db.session.commit()
+            login_user(new_user)
+        else:
+            if user.password != form.password.data:
+                print("Wrong Password")
+                return redirect('/')
+            login_user(user)
         session['name'] = form.name.data
         session['password'] = form.password.data
         return redirect('/get_user_panel')
@@ -43,7 +68,15 @@ def get_login():
         form.password.data = session.get('password', '')
     return render_template('login.html', form=form)
 
+@app.route('/log_out')
+@login_required
+def log_out():
+    logout_user()
+    return 'Logged out'
+
+
 @app.route('/get_user_panel',methods=['GET','POST'])
+@login_required
 def get_user_panel():
     print("Get User Panel")
     form=ChannelForm()
@@ -54,6 +87,7 @@ def get_user_panel():
     return render_template('user_panel.html',form=form)
 
 @app.route('/channel',methods=['GET','POST'])
+@login_required
 def get_channel():
     print("Get Channel")
     nickname = session.get('nickname', '')
