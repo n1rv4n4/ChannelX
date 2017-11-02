@@ -33,9 +33,11 @@ class User(UserMixin,db.Model):
     username=db.Column(db.String(20),unique=True)
     password=db.Column(db.String(20))
 
-
-
-
+class ChannelHistory(db.Model):
+    id=db.Column(db.Integer,primary_key=True)
+    channel_name=db.Column(db.String(20))
+    username=db.Column(db.String(20))
+    nickname=db.Column(db.String(20))
 
 socketio = SocketIO(app)
 
@@ -79,12 +81,28 @@ def log_out():
 @login_required
 def get_user_panel():
     print("Get User Panel")
+    username=session['name']
+    channels=ChannelHistory.query.filter_by(username=username)
     form=ChannelForm()
     if form.validate_on_submit():
-		session['channel_name']=form.channel_name.data
-		session['nickname']=form.nickname.data
-		return redirect(url_for('get_channel'))
-    return render_template('user_panel.html',form=form)
+        if channels:
+            flag=False
+            for channel in channels:
+                if channel.channel_name == form.channel_name.data:
+                    flag=True
+                    session['channel_name']=channel.channel_name
+                    session['nickname']=channel.nickname
+            if not flag:
+                new_channel=ChannelHistory(channel_name=form.channel_name.data,nickname=form.nickname.data,username=username)
+                db.session.add(new_channel)
+                db.session.commit()
+                session['channel_name']=form.channel_name.data
+                session['nickname']=form.nickname.data
+        else:
+            session['channel_name']=form.channel_name.data
+            session['nickname']=form.nickname.data
+        return redirect(url_for('get_channel'))
+    return render_template('user_panel.html',form=form,channels=[channel.channel_name for channel in channels])
 
 @app.route('/channel',methods=['GET','POST'])
 @login_required

@@ -10,5 +10,10 @@
             {{ form.nickname.label }}: {{ form.nickname() }} {% for error in form.nickname.errors %}{{ error }}{% endfor %}<br>
             {{ form.submit() }}
         </form>
+        <ul>
+            {% for channel in channels %}
+            <li>{{channel}}</li>
+            {% endfor %}
+        </ul>
     </body>
 </html>
