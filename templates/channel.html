@@ -31,7 +31,7 @@
                 socket.emit('left', {}, function() {
                     socket.disconnect();
 
-                    // go back to the login page
+                    //Go back to user panel
                     window.location.href = "{{ url_for('get_user_panel') }}";
                 });
             }
@@ -41,6 +41,6 @@
         <h1>ChannelX: {{ channel_name }}</h1>
         <textarea id="chat" cols="80" rows="20"></textarea><br><br>
         <input id="text" size="80" placeholder="Enter your message here"><br><br>
-        <a href="#" onclick="leave_room();">Leave this room</a>
+        <a href="#" onclick="leave_room();">Leave this channel</a>
     </body>
 </html>

@@ -122,7 +122,7 @@ def joined(message):
     channel_name = session.get('channel_name')
     nickname=session.get('nickname')
     join_room(channel_name)
-    emit('status', {'msg': nickname + ' has entered the room.'}, room=channel_name)
+    emit('status', {'msg': nickname + ' has entered the channel.'}, room=channel_name)
 
 
 @socketio.on('text',namespace='/channel')
@@ -140,10 +140,10 @@ def text(message):
 def left(message):
     """Sent by clients when they leave a channel.
     A status message is broadcast to all people in the channel."""
-    print("Leaving room")
+    print("Leaving channel")
     channel_name = session.get('channel_name')
     leave_room(channel_name)
-    emit('status', {'msg': session.get('nickname') + ' has left the room.'}, room=channel_name)
+    emit('status', {'msg': session.get('nickname') + ' has left the channel.'}, room=channel_name)
 
 if __name__ == '__main__':
 	socketio.run(app)
