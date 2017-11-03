@@ -99,6 +99,9 @@ def get_user_panel():
                 session['channel_name']=form.channel_name.data
                 session['nickname']=form.nickname.data
         else:
+            new_channel=ChannelHistory(channel_name=form.channel_name.data,nickname=form.nickname.data,username=username)
+            db.session.add(new_channel)
+            db.session.commit()
             session['channel_name']=form.channel_name.data
             session['nickname']=form.nickname.data
         return redirect(url_for('get_channel'))
