@@ -1,33 +1,35 @@
 from flask import Flask,session, redirect, url_for, render_template, request
 from flask_socketio import SocketIO, send,emit, join_room, leave_room
-from flask_wtf import FlaskForm		# Using FlaskForm rather than form eliminates deprecation warning.
-from wtforms.fields import StringField, SubmitField,PasswordField
+from flask_wtf import FlaskForm, RecaptchaField		# Using FlaskForm rather than form eliminates deprecation warning.
+from wtforms.fields import StringField, SubmitField, PasswordField
 from wtforms.validators import Required
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager,UserMixin,login_user,login_required,logout_user
 import os
-
-basedir = os.path.abspath(os.path.dirname(__file__))	# Relative path for SQLAlchemy database file.
-
-RECAPTCHA_PUBLIC_KEY = '6Ld9yzgUAAAAABhNSebzM2V1ZDn9j5eb1iWhlOma'
-RECAPTCHA_PRIVATE_KEY = '6Ld9yzgUAAAAAO75KNjOiT4QH5uCbn6sl_WzdHHU'
 
 class LoginForm(FlaskForm):
     """ Accepts a name and a password. """
     name = StringField('User Name', validators=[Required()])
     password = PasswordField('Password', validators=[Required()])
     submit = SubmitField('Sign In')
+    recaptcha = RecaptchaField()
 
 class ChannelForm(FlaskForm):
     """ Accepts a channel_name and a nickname. """
     channel_name = StringField('Channel Name', validators=[Required()])
     nickname = StringField('Nickname', validators=[Required()])
     submit = SubmitField('Join!')
+    recaptcha = RecaptchaField()
 
+basedir = os.path.abspath(os.path.dirname(__file__))	# Relative path for SQLAlchemy database file.
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'ChannelX!^+%&/(()=?798465312-_*'	# Random complex key for CSRF security.
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS']= False				# Eliminates SQLAlchemy deprecation warning.
 app.config['SQLALCHEMY_DATABASE_URI']= 'sqlite:///' + os.path.join(basedir, 'login.db')
+app.config['RECAPTCHA_PUBLIC_KEY'] = '6Ld9yzgUAAAAABhNSebzM2V1ZDn9j5eb1iWhlOma'
+app.config['RECAPTCHA_PRIVATE_KEY'] = '6Ld9yzgUAAAAAO75KNjOiT4QH5uCbn6sl_WzdHHU'
+app.config['RECAPTCHA_DATA_ATTRS'] = {'theme': 'dark'}
+app.config['DEBUG'] = True
 db=SQLAlchemy(app)
 login_manager=LoginManager()
 login_manager.init_app(app)
