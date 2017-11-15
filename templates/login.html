@@ -1,11 +1,12 @@
 <html>
     <head>
         <title>ChannelX</title>
-		<meta charset="utf-8">
-	    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+		    <meta charset="utf-8">
+	      <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css" integrity="sha384-PsH8R72JQ3SOdhVi3uxftmaW6Vc51MKb0q5P2rRUpPvrszuE4W1povHYgTpBfshb" crossorigin="anonymous">
-		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+		    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+		    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+        <script src='https://www.google.com/recaptcha/api.js'></script>
     </head>
     <body>
 		<div class="jumbotron jumbotron-fluid text-center bg-faded">
@@ -20,6 +21,7 @@
             {{ FlaskForm.hidden_tag() }}
             {{ FlaskForm.name.label }}: {{ FlaskForm.name() }} {% for error in FlaskForm.name.errors %}{{ error }}{% endfor %}<br>
             {{ FlaskForm.password.label }}: {{ FlaskForm.password() }} {% for error in FlaskForm.password.errors %}{{ error }}{% endfor %}<br>
+            <div align="center" class="g-recaptcha" data-sitekey="6Ld9yzgUAAAAABhNSebzM2V1ZDn9j5eb1iWhlOma"></div>
             {{ FlaskForm.submit() }}
 		</fieldset>
 		</div>
