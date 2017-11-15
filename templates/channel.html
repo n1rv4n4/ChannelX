@@ -1,8 +1,10 @@
 <html>
     <head>
-        <title>ChannelX : {{ channel_name }}</title>
+        <title>ChannelX - {{ channel_name }}</title>
         <script type="text/javascript" src="//code.jquery.com/jquery-1.4.2.min.js"></script>
         <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/socket.io/1.3.6/socket.io.min.js"></script>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css" integrity="sha384-PsH8R72JQ3SOdhVi3uxftmaW6Vc51MKb0q5P2rRUpPvrszuE4W1povHYgTpBfshb" crossorigin="anonymous">
         <script type="text/javascript" charset="utf-8">
             var socket;
             $(document).ready(function(){
@@ -31,16 +33,21 @@
                 socket.emit('left', {}, function() {
                     socket.disconnect();
 
-                    //Go back to user panel
+                    // Go back to user panel.
                     window.location.href = "{{ url_for('get_user_panel') }}";
                 });
             }
         </script>
     </head>
     <body>
-        <h1>ChannelX: {{ channel_name }}</h1>
-        <textarea id="chat" cols="80" rows="20"></textarea><br><br>
-        <input id="text" size="80" placeholder="Enter your message here"><br><br>
-        <a href="#" onclick="leave_room();">Leave this channel</a>
+	<h1 class="lead display-3 text-center">Channel Room</h1>
+	<div class="col-lg text-center">
+        <textarea id="chat" cols="149" rows="18"></textarea>
+        <input id="text" size="149" placeholder="Enter your message here.">
+	</div>
+	<br>
+	<div class="col-lg text-center"></div>
+        <button onclick="leave_room();" href="#" type="button" class="btn btn-danger btn-block">Leave this channel!</button>
+	</div>
     </body>
 </html>
