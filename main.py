@@ -9,6 +9,9 @@ import os
 
 basedir = os.path.abspath(os.path.dirname(__file__))	# Relative path for SQLAlchemy database file.
 
+RECAPTCHA_PUBLIC_KEY = '6Ld9yzgUAAAAABhNSebzM2V1ZDn9j5eb1iWhlOma'
+RECAPTCHA_PRIVATE_KEY = '6Ld9yzgUAAAAAO75KNjOiT4QH5uCbn6sl_WzdHHU'
+
 class LoginForm(FlaskForm):
     """ Accepts a name and a password. """
     name = StringField('User Name', validators=[Required()])
@@ -57,7 +60,7 @@ def get_login():
 			new_user=User(username=FlaskForm.name.data,password=FlaskForm.password.data)
 			db.session.add(new_user)
 			db.session.commit()
-			login_user(new_user) 
+			login_user(new_user)
 			print(FlaskForm.name.data + " has logged in.")
 		else:
 			if user.password != FlaskForm.password.data:
@@ -76,7 +79,7 @@ def get_login():
 @login_required
 def log_out():
 	logout_user()
-	print(session.get('name') + " has logged out.") 
+	print(session.get('name') + " has logged out.")
 	return 'Logged out.'
 
 
