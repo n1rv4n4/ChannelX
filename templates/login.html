@@ -21,7 +21,7 @@
             {{ FlaskForm.name.label }}: {{ FlaskForm.name() }} {% for error in FlaskForm.name.errors %}{{ error }}{% endfor %}<br>
             {{ FlaskForm.password.label }}: {{ FlaskForm.password() }} {% for error in FlaskForm.password.errors %}{{ error }}{% endfor %}<br>
             <center>{{ FlaskForm.recaptcha }}</center>
-            <input class="btn btn-success" type="submit" value="Sign In">
+            <input class="btn btn-success" type="submit" value="Log In">
 		</fieldset>
 		</div>
         </form>
