@@ -7,6 +7,10 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager,UserMixin,login_user,login_required,logout_user
 import os
 
+from flask.helpers import url_for
+import datetime
+
+
 class LoginForm(FlaskForm):
     """ Accepts a name and a password. """
     name = StringField('User Name', validators=[Required()])
@@ -53,6 +57,11 @@ def load_user(user_id):
     return User.query.get(int(user_id))
 
 @app.route('/',methods=['GET','POST'])
+def home_page():
+    now = datetime.datetime.now()
+    return render_template('index.html', current_time=now.ctime())
+
+@app.route('/login',methods=['GET','POST'])
 def get_login():
 	FlaskForm = LoginForm()
 	if FlaskForm.validate_on_submit():
