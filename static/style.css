@@ -5,10 +5,6 @@ body {
   margin: 2ex 2em;
 }
 
-/* Bordered form */
-form {
-    border: 3px solid #f1f1f1;
-}
 
 /* Full-width inputs */
 input[type=text], input[type=password], input[type=email] {
@@ -28,7 +24,7 @@ button {
     margin: 12px 0;
     border: none;
     cursor: pointer;
-    width: 100%;
+    width: 50%;
 }
 
 
@@ -41,13 +37,13 @@ button {
     float: right;
 }
 
-.room {
+.channel {
     width: 60%;
     float: left;
     padding: 16px;
 }
 
-.login-signup {
+.login {
 	padding: 8px;
 	width: 97%; 
 	text-align: right;
