@@ -2,7 +2,7 @@ from flask import Flask,session, redirect, url_for, render_template, request
 from flask_socketio import SocketIO, send,emit, join_room, leave_room
 from flask_wtf import FlaskForm, RecaptchaField		# Using FlaskForm rather than form eliminates deprecation warning.
 from wtforms.fields import StringField, SubmitField, PasswordField
-from wtforms.validators import Required
+from wtforms.validators import Required, Email,length
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager,UserMixin,login_user,login_required,logout_user
 import os
@@ -10,26 +10,11 @@ import os
 from flask.helpers import url_for
 import datetime
 
-
-class LoginForm(FlaskForm):
-    """ Accepts a name and a password. """
-    name = StringField('User Name', validators=[Required()])
-    password = PasswordField('Password', validators=[Required()])
-    submit = SubmitField('Sign In')
-    recaptcha = RecaptchaField()
-
-class ChannelForm(FlaskForm):
-    """ Accepts a channel_name and a nickname. """
-    channel_name = StringField('Channel Name', validators=[Required()])
-    nickname = StringField('Nickname', validators=[Required()])
-    submit = SubmitField('Join!')
-    recaptcha = RecaptchaField()
-
 basedir = os.path.abspath(os.path.dirname(__file__))	# Relative path for SQLAlchemy database file.
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'ChannelX!^+%&/(()=?798465312-_*'	# Random complex key for CSRF security.
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS']= False				# Eliminates SQLAlchemy deprecation warning.
-app.config['SQLALCHEMY_DATABASE_URI']= 'sqlite:///' + os.path.join(basedir, 'login.db')
+app.config['SQLALCHEMY_DATABASE_URI']= 'sqlite:///' + os.path.join(basedir, 'mylogin.db')
 app.config['RECAPTCHA_PUBLIC_KEY'] = '6Ld9yzgUAAAAABhNSebzM2V1ZDn9j5eb1iWhlOma'
 app.config['RECAPTCHA_PRIVATE_KEY'] = '6Ld9yzgUAAAAAO75KNjOiT4QH5uCbn6sl_WzdHHU'
 app.config['RECAPTCHA_DATA_ATTRS'] = {'theme': 'dark'}
@@ -38,15 +23,29 @@ db=SQLAlchemy(app)
 login_manager=LoginManager()
 login_manager.init_app(app)
 
-class User(UserMixin,db.Model):
-    id=db.Column(db.Integer,primary_key=True)
-    username=db.Column(db.String(20),unique=True)
-    password=db.Column(db.String(20))
+class LoginForm(FlaskForm):
+    """ Accepts a name and a password. """
+    Username = StringField('User Name', validators=[Required()])
+    Password = PasswordField('Password', validators=[Required()])
+    submit = SubmitField('Sign In')
 
-class ChannelHistory(db.Model):
+class ChannelForm(FlaskForm):
+    """ Accepts a channel_name and a nickname. """
+    channel_name = StringField('Channel Name', validators=[Required()])
+    nickname = StringField('Nickname', validators=[Required()])
+    submit = SubmitField('Join!')
+
+class User(UserMixin,db.Model):
+	id=db.Column(db.Integer,primary_key=True)
+	Username=db.Column(db.String(20),unique=True)
+	Password=db.Column(db.String(20))
+	Name=db.Column(db.String(50))
+	Email=db.Column(db.String(20))
+
+class Channel(db.Model):
     id=db.Column(db.Integer,primary_key=True)
     channel_name=db.Column(db.String(20))
-    username=db.Column(db.String(20))
+    Username=db.Column(db.String(20))
     nickname=db.Column(db.String(20))
 
 socketio = SocketIO(app, async_mode='gevent')	# Working with gevent mode provides keyboard interrupt with CTRL+C.
@@ -59,32 +58,75 @@ def load_user(user_id):
 @app.route('/',methods=['GET','POST'])
 def home_page():
     now = datetime.datetime.now()
-    return render_template('index.html', current_time=now.ctime())
-
-@app.route('/login',methods=['GET','POST'])
-def get_login():
-	FlaskForm = LoginForm()
-	if FlaskForm.validate_on_submit():
-		print("Someone in login panel.")
-		user=User.query.filter_by(username=FlaskForm.name.data).first()
-		if not user:
-			new_user=User(username=FlaskForm.name.data,password=FlaskForm.password.data)
-			db.session.add(new_user)
-			db.session.commit()
-			login_user(new_user)
-			print(FlaskForm.name.data + " has logged in.")
+    return render_template('index.html')
+    
+@app.route('/Sign_Up', methods = ['GET','POST'])
+def Sign_Up():
+	if request.method == 'POST':
+		Name = request.form['Name']
+		Username = request.form['Username']
+		Password = request.form['Password']
+		Email = request.form['Email']
+		Confirm = request.form['Confirm']
+		usr = User.query.filter_by(Username = Username).first()
+		if usr:
+		    username_error = "username already exists choose another one"
+		    return render_template('/Sign_Up.html',username_error = username_error)
 		else:
-			if user.password != FlaskForm.password.data:
-				print("Someone tried to log in with wrong password!")
-				return redirect('/')
-			login_user(user)
-		session['name'] = FlaskForm.name.data
-		session['password'] = FlaskForm.password.data
-		return redirect('/get_user_panel')
-	elif request.method == 'GET':
-		FlaskForm.name.data = session.get('name')
-		FlaskForm.password.data = session.get('password')
-	return render_template('login.html', FlaskForm=FlaskForm)
+			if Password == Confirm:
+				new_user = User(Name = Name, Username = Username, Password = Password,Email = Email)
+				db.session.add(new_user)
+				db.session.commit()
+				login_user(new_user)
+				session['name'] = Name
+				session['UserName'] = Username
+				return redirect('/get_user_panel')
+			else:
+				password_match = "Passwords could not match try again"
+				return render_template('/Sign_Up.html',password_match = password_match)
+	else:
+	    return render_template('Sign_Up.html')
+	
+@app.route('/get_login',methods=['GET','POST'])
+def get_login():
+	if request.method == 'GET':
+		return render_template('login.html')
+	else:
+		Username = request.form['Username']
+		Password = request.form['Password']
+		usr = User.query.filter_by(Username = Username).first()
+		if usr:
+			if usr.Password == Password:
+				login_user(usr)
+				session['name'] = usr.Name
+				session['UserName'] = usr.Username
+				return redirect('/get_user_panel')
+			else:
+			    password_failure = "password failure"
+			    return render_template('/login.html',password_failure = password_failure)
+		else:
+			name_error = "Username not found"
+			return render_template('/login.html',name_error = name_error)
+
+@app.route('/join',methods=['GET','POST'])
+def join():	
+	if request.method == 'GET':
+		return render_template('join.html')
+	else:
+		channel_name = request.form['channel_name']
+		nickname = request.form['NickName']
+		session['channel_name'] = channel_name
+		session['nickname'] = nickname
+		chnn = Channel.query.filter_by(channel_name=channel_name).first()
+		if not chnn:
+			ChannelName_error = "Sorry Channel Name is not Found"
+			return render_template('join.html',ChannelName_error = ChannelName_error)
+		nick = Channel.query.filter_by(nickname=nickname).first()
+		if nick:
+			NickName_failure = "This Nickname is already being used"
+			return render_template('join.html',NickName_failure = NickName_failure)
+		return redirect(url_for('get_channel'))
+		
 
 @app.route('/log_out')
 @login_required
@@ -93,40 +135,34 @@ def log_out():
 	print(session.get('name') + " has logged out.")
 	return 'Logged out.'
 
-
 @app.route('/get_user_panel',methods=['GET','POST'])
 @login_required
 def get_user_panel():
-    print(session.get('name') + " in user panel.")
-    username=session['name']
-    channels=ChannelHistory.query.filter_by(username=username)
-    FlaskForm=ChannelForm()
-    if FlaskForm.validate_on_submit():
-        if channels:
-            flag=False
-            for channel in channels:
-                if channel.channel_name == FlaskForm.channel_name.data:
-                    flag=True
-                    session['channel_name']=channel.channel_name
-                    session['nickname']=channel.nickname
-            if not flag:
-                new_channel=ChannelHistory(channel_name=FlaskForm.channel_name.data,nickname=FlaskForm.nickname.data,username=username)
-                db.session.add(new_channel)
-                db.session.commit()
-                session['channel_name']=FlaskForm.channel_name.data
-                session['nickname']=FlaskForm.nickname.data
-                print(session.get('name') + " selected a nickname " + session.get('nickname'))
-        else:
-            new_channel=ChannelHistory(channel_name=FlaskForm.channel_name.data,nickname=FlaskForm.nickname.data,username=username)
-            db.session.add(new_channel)
-            db.session.commit()
-            session['channel_name']=FlaskForm.channel_name.data
-            session['nickname']=FlaskForm.nickname.data
-        return redirect(url_for('get_channel'))
-    return render_template('user_panel.html',FlaskForm=FlaskForm,channels=[channel.channel_name for channel in channels])
+	if request.method == 'GET':
+		return render_template('user_panel.html')
+	else:
+		name = session['name']
+		user = session['UserName']
+		channel_name = request.form['Channel_Name']
+		nickname = request.form['NickName']
+		chn = Channel.query.filter_by(channel_name=channel_name).first()
+		if chn:
+			ChannelName_error = "Channel is already exists please choose another"
+			return render_template('user_panel.html',ChannelName_error = ChannelName_error)
+			
+		nick = Channel.query.filter_by(nickname=nickname).first()
+		if nick:
+			NickName_failure = "Nick name is already being used now try something else"
+			return render_template('user_panel.html',NickName_failure = NickName_failure)
+		new_channel = Channel(Username = user, nickname = nickname,channel_name = channel_name)
+		session['nickname'] = nickname
+		session['channel_name'] = channel_name
+		db.session.add(new_channel)
+		db.session.commit()
+		return redirect(url_for('get_channel'))
+
 
 @app.route('/channel',methods=['GET','POST'])
-@login_required
 def get_channel():
     print(session.get('nickname') + " created channel " + session.get('channel_name'))
     nickname = session.get('nickname')
