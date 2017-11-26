@@ -1,37 +1,46 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <meta content="width=device-width, initial-scale=1" name="viewport">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css" integrity="sha384-PsH8R72JQ3SOdhVi3uxftmaW6Vc51MKb0q5P2rRUpPvrszuE4W1povHYgTpBfshb" crossorigin="anonymous">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.1/css/font-awesome.min.css" rel="stylesheet">
     <link href='https://fonts.googleapis.com/css?family=Passion+One' rel='stylesheet' type='text/css'>
     <link href='https://fonts.googleapis.com/css?family=Oxygen' rel='stylesheet' type='text/css'>
-    <link href="/static/style.css" rel='stylesheet' type='text/css'>
-    <link rel="icon" type="image/png" sizes="16x16" href="/static/favicon.png">
+    <link href="/static/css/style.css" rel='stylesheet' type='text/css'>
+    <link rel="icon" type="image/png" sizes="16x16" href="/static/images/favicon.png">
     <title>User Panel</title>
   </head>
   <body>
     <div class="container">
       <div class="row main">
         <div class="main-login main-center">
-          <form action="{{ url_for('user_panel') }}" class="" method="post">
-            <div class="form-group">
-              <label class="cols-sm-2 control-label" for="Channel_Name">Channel Name</label>
-              <div class="cols-sm-10">
-                <div class="input-group">
-                  <span class="input-group-addon"><i aria-hidden="true" class="fa fa-users fa"></i></span> <input class="form-control" id="Channel_Name" name="Channel_Name" placeholder="Enter channel name." type="text">
-                </div>
-              </div>
-              {{ ChannelName_error }}
-            </div>
+          <form action="{{ url_for('user_panel') }}" class="" method="POST">
             <div class="form-group">
               <label class="cols-sm-2 control-label" for="Nickname">Nickname</label>
               <div class="cols-sm-10">
                 <div class="input-group">
-                  <span class="input-group-addon"><i aria-hidden="true" class="fa fa-lock fa-lg"></i></span> <input class="form-control" id="NickName" name="NickName" placeholder="Enter your nickname." type="text">
+                  <span class="input-group-addon"><i aria-hidden="true" class="fa fa-user-secret fa-lg"></i></span> <input class="form-control" id="Nickname" name="Nickname" placeholder="Enter your nickname." type="text">
                 </div>
               </div>
               {{ NickName_failure }}
+            </div>
+            <div class="form-group">
+              <label class="cols-sm-2 control-label" for="Channel_Name">Channel Name</label>
+              <div class="cols-sm-10">
+                <div class="input-group">
+                  <span class="input-group-addon"><i aria-hidden="true" class="fa fa-user-plus fa"></i></span> <input class="form-control" id="Channel_Name" name="Channel_Name" placeholder="Enter channel name." type="text">
+                </div>
+              </div>
+              {{ ChannelName_failure }}
+            </div>
+            <div class="form-group">
+              <label class="cols-sm-2 control-label" for="Channel_Name">Channel Password</label>
+              <div class="cols-sm-10">
+                <div class="input-group">
+                  <span class="input-group-addon"><i aria-hidden="true" class="fa fa-lock fa"></i></span> <input class="form-control" id="Channel_Password" name="Channel_Password" placeholder="Enter channel password." type="password">
+                </div>
+              </div>
+              {{ ChannelPassword_failure }}
             </div>
             <div class="form-group">
               <button class="btn btn-primary btn-lg btn-block login-button" id="button" type="submit">Create Channel</button>

@@ -6,8 +6,8 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.1/css/font-awesome.min.css">
     <link href='https://fonts.googleapis.com/css?family=Passion+One' rel='stylesheet' type='text/css'>
     <link href='https://fonts.googleapis.com/css?family=Oxygen' rel='stylesheet' type='text/css'>
-    <link href="/static/style.css" rel='stylesheet' type='text/css'>
-    <link rel="icon" type="image/png" sizes="16x16" href="/static/favicon.png">
+    <link href="/static/css/style.css" rel='stylesheet' type='text/css'>
+    <link rel="icon" type="image/png" sizes="16x16" href="/static/images/favicon.png">
     <title>Join</title>
   </head>
   <body>
@@ -17,24 +17,34 @@
           <h5>Join an existing chat room.</h5>
           <form class="" method="post" action="{{ url_for('join') }}">
             <div class="form-group">
-              <label for="channel_name" class="cols-sm-2 control-label">Channel Name</label>
-              <div class="cols-sm-10">
-                <div class="input-group">
-                  <span class="input-group-addon"><i class="fa fa-users fa" aria-hidden="true"></i></span>
-                  <input type="text" class="form-control" name="channel_name" id="channel_name"  placeholder="Enter your channel name."/>
-                </div>
-              </div>
-              {{ ChannelName_error }}
-            </div>
-            <div class="form-group">
               <label for="Nickname" class="cols-sm-2 control-label">Nickname</label>
               <div class="cols-sm-10">
                 <div class="input-group">
-                  <span class="input-group-addon"><i class="fa fa-lock fa-lg" aria-hidden="true"></i></span>
-                  <input type="password" class="form-control" name="Nickname" id="password"  placeholder="Enter your nickname."/>
+                  <span class="input-group-addon"><i class="fa fa-user-secret fa-lg" aria-hidden="true"></i></span>
+                  <input type="text" class="form-control" name="Nickname" id="Nickname"  placeholder="Enter your nickname."/>
                 </div>
               </div>
-              {{ NickName_failure }}
+              {{ Nickname_failure }}
+            </div>
+            <div class="form-group">
+              <label for="Channel_Name" class="cols-sm-2 control-label">Channel Name</label>
+              <div class="cols-sm-10">
+                <div class="input-group">
+                  <span class="input-group-addon"><i class="fa fa-comments fa" aria-hidden="true"></i></span>
+                  <input type="text" class="form-control" name="Channel_Name" id="Channel_Name"  placeholder="Enter your channel name."/>
+                </div>
+              </div>
+              {{ ChannelName_failure }}
+            </div>
+            <div class="form-group">
+              <label for="Channel Password" class="cols-sm-2 control-label">Channel Password</label>
+              <div class="cols-sm-10">
+                <div class="input-group">
+                  <span class="input-group-addon"><i class="fa fa-lock fa-lg" aria-hidden="true"></i></span>
+                  <input type="password" class="form-control" name="Channel_Password" id="Channel_Password"  placeholder="Enter channel password."/>
+                </div>
+              </div>
+              {{ ChannelPassword_failure }}
             </div>
             <div class="form-group ">
               <button  type="submit" id="button" class="btn btn-primary btn-lg btn-block login-button">Join</button>

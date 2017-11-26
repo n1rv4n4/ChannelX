@@ -5,4 +5,4 @@ Flask-SocketIO
 SQLAlchemy
 SQLite3
 Gevent
-Bootstrap 4
+Bootstrap 4.0.0 and 3.3.7

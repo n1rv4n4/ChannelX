@@ -1,16 +1,16 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>ChannelX - {{ channel_name }}</title>
-    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>ChannelX - {{ Channel_Name }}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.4/socket.io.js" type="text/javascript"></script>
-    <script src="/static/channel.js" type="text/javascript"></script>
+    <script src="/static/js/channel.js" type="text/javascript"></script>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css" integrity="sha384-PsH8R72JQ3SOdhVi3uxftmaW6Vc51MKb0q5P2rRUpPvrszuE4W1povHYgTpBfshb" crossorigin="anonymous">
-    <link rel="icon" type="image/png" sizes="16x16" href="/static/favicon.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/static/images/favicon.png">
   </head>
   <body>
-    <img src="/static/channel.png" class="col-lg-2 col-md-2 col-sm-2 col-xs-12 d-block mx-auto" alt="ChannelX">
+    <img src="/static/images/channel.png" class="col-lg-2 col-md-2 col-sm-2 col-xs-12 d-block mx-auto" alt="ChannelX">
     <div class="text-center form-group">
       <textarea class="form-control" cols="149" id="chat" rows="14"></textarea> <input class="form-control" id="text" placeholder="Enter your message here." size="50">
       <button class="btn btn-info fixed-bottom btn-block" onclick="leave_room();" type="button">Leave this channel!</button>
