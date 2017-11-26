@@ -2,7 +2,6 @@ Python 2.7 or 3.6
 Flask
 Flask-Login
 Flask-SocketIO
-Flask-WTForms
 SQLAlchemy
 SQLite3
 Gevent
