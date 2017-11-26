@@ -7,7 +7,6 @@ import os
 basedir = os.path.abspath(os.path.dirname(__file__))	# Relative path for SQLAlchemy database file.
 app = Flask(__name__)
 
-app.config['g-recaptcha-response'] = '6Ld9yzgUAAAAAO75KNjOiT4QH5uCbn6sl_WzdHHU'
 app.config['SECRET_KEY'] = 'ChannelX!^+%&/(()=?798465312-_*'	# Random complex key for CSRF security.
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS']= False				# Eliminates SQLAlchemy deprecation warning.
 app.config['SQLALCHEMY_DATABASE_URI']= 'sqlite:///' + os.path.join(basedir, 'database.db')
