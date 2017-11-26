@@ -155,7 +155,6 @@ def user_panel():
 		return redirect('/channel')
 
 @app.route('/channel',methods=['GET','POST'])
-@login_required
 def channel():
     print(session.get('Nickname') + " created channel " + session.get('Channel_Name'))
     Nickname = session.get('Nickname')
