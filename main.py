@@ -16,6 +16,9 @@ db=SQLAlchemy(app)
 login_manager=LoginManager()
 login_manager.init_app(app)
 
+nicks = {}
+nicks.setdefault("",[])
+
 class User(UserMixin, db.Model):
 	id=db.Column(db.Integer,primary_key=True)
 	Username=db.Column(db.String(20),unique=True)
@@ -28,7 +31,6 @@ class Channel(db.Model):
 	Channel_Name=db.Column(db.String(20))
 	Channel_Password=db.Column(db.String(20))
 	Username=db.Column(db.String(20))
-	Nickname=db.Column(db.String(20))
 
 socketio = SocketIO(app, async_mode='gevent')	# Working with gevent mode provides keyboard interrupt with CTRL+C.
 db.create_all()		# Creates DB.
@@ -113,11 +115,11 @@ def join():
 			ChannelPassword_failure = "Channel name and password could not match!"
 			return render_template('join.html', ChannelPassword_failure = ChannelPassword_failure)
 
-		nick = Channel.query.filter_by(Nickname=Nickname).first()
-		if nick:
+		if Nickname in nicks[Channel_Name]:
 			Nickname_failure = "This nickname is already being used!"
 			return render_template('join.html', Nickname_failure = Nickname_failure)
-
+		else:
+		    nicks[Channel_Name].append(Nickname)
 		return redirect('/channel')
 
 @app.route('/log_out')
@@ -142,12 +144,14 @@ def user_panel():
 		if chn:
 			ChannelName_failure = "Channel is already exists please choose another."
 			return render_template('user_panel.html', ChannelName_failure = ChannelName_failure)
+		else:
+		    nicks[Channel_Name] = []
 
-		nick = Channel.query.filter_by(Nickname=Nickname).first()
-		if nick:
+		if Nickname in nicks[Channel_Name]:
 			NickName_failure = "Nickname is already being used now try something else."
 			return render_template('user_panel.html',NickName_failure = NickName_failure)
-		new_channel = Channel(Username = User, Nickname = Nickname, Channel_Name = Channel_Name, Channel_Password = Channel_Password)
+		new_channel = Channel(Username = User, Channel_Name = Channel_Name, Channel_Password = Channel_Password)
+		nicks[Channel_Name].append(Nickname)
 		session['Nickname'] = Nickname
 		session['Channel_Name'] = Channel_Name
 		db.session.add(new_channel)
@@ -175,13 +179,14 @@ def text(message):
     Channel_Name = session.get('Channel_Name')
     Nickname=session.get('Nickname')
     emit('message', {'msg': Nickname + ': ' + message['msg']}, room=Channel_Name)
-
+	
 @socketio.on('left',namespace='/channel')
 def left(message):
-    print(session.get('Nickname') + " leaved the channel " + session.get('Channel_Name'))
-    Channel_Name = session.get('Channel_Name')
-    leave_room(Channel_Name)
-    emit('status', {'msg': session.get('Nickname') + ' has left the channel.'}, room=Channel_Name)
-
+	print(session.get('Nickname') + " leaved the channel " + session.get('Channel_Name'))
+	Channel_Name = session.get('Channel_Name')
+	leave_room(Channel_Name)
+	emit('status', {'msg': session.get('Nickname') + ' has left the channel.'}, room=Channel_Name)
+	nicks[Channel_Name].remove(session.get('Nickname'))
+	
 if __name__ == '__main__':
 	socketio.run(app)
