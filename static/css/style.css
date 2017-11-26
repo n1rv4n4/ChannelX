@@ -6,7 +6,7 @@
 body, html{
      height: 100%;
  	background-repeat: no-repeat;
- 	background:url(/static/background.jpg);
+ 	background:url(/static/images/background.jpg);
  	font-family: 'Oxygen', sans-serif;
 	    background-size: cover;
 }
