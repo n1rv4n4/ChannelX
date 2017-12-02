@@ -16,9 +16,6 @@ db=SQLAlchemy(app)
 login_manager=LoginManager()
 login_manager.init_app(app)
 
-nicks = {}
-nicks.setdefault("",[])
-
 class User(UserMixin, db.Model):
 	id=db.Column(db.Integer,primary_key=True)
 	Username=db.Column(db.String(20),unique=True)
@@ -31,6 +28,13 @@ class Channel(db.Model):
 	Channel_Name=db.Column(db.String(20))
 	Channel_Password=db.Column(db.String(20))
 	Username=db.Column(db.String(20))
+	Chat_Admin=db.Column(db.String(20))
+
+class Nickname(db.Model):
+	id=db.Column(db.Integer,primary_key=True)
+	nickname=db.Column(db.String(20))
+	username=db.Column(db.String(20))
+	channel_name=db.Column(db.String(20))
 
 socketio = SocketIO(app, async_mode='gevent')	# Working with gevent mode provides keyboard interrupt with CTRL+C.
 db.create_all()		# Creates DB.
@@ -55,8 +59,8 @@ def sign_up():
 		Password = request.form['Password']
 		Email = request.form['Email']
 		Confirm = request.form['Confirm']
-		usr = User.query.filter_by(Username = Username).first()
-		if usr:
+		user = User.query.filter_by(Username = Username).first()
+		if user:
 		    username_failure = "Username already exists choose another one."
 		    return render_template('sign_up.html', username_failure = username_failure)
 		else:
@@ -81,12 +85,12 @@ def login():
 	else:
 		Username = request.form['Username']
 		Password = request.form['Password']
-		usr = User.query.filter_by(Username = Username).first()
-		if usr:
-			if usr.Password == Password:
-				login_user(usr)
-				session['Name'] = usr.Name
-				session['Username'] = usr.Username
+		user = User.query.filter_by(Username = Username).first()
+		if user:
+			if user.Password == Password:
+				login_user(user)
+				session['Name'] = user.Name
+				session['Username'] = user.Username
 				return redirect('/user_panel')
 			else:
 			    password_failure = "Password failure!"
@@ -102,9 +106,9 @@ def join():
 	else:
 		Channel_Name = request.form['Channel_Name']
 		Channel_Password = request.form['Channel_Password']
-		Nickname = request.form['Nickname']
+		nick = request.form['Nickname']
 		session['Channel_Name'] = Channel_Name
-		session['Nickname'] = Nickname
+		session['Nickname'] = nick
 
 		chnn = Channel.query.filter_by(Channel_Name=Channel_Name).first()
 		if not chnn:
@@ -114,12 +118,24 @@ def join():
 		if chnn.Channel_Password != Channel_Password:
 			ChannelPassword_failure = "Channel name and password could not match!"
 			return render_template('join.html', ChannelPassword_failure = ChannelPassword_failure)
+		nicknames=Nickname.query.filter_by(channel_name=Channel_Name).all()
+		nickname_matched=False
+		for nickname in nicknames:
+			if nickname.nickname == nick:
+				if nickname.username == session['Username']:
+					nickname_matched=True
+					break
+				else:
+					Nickname_failure = "This nickname is already being used by another user!"
+					return render_template('join.html', Nickname_failure = Nickname_failure)
+			elif nickname.username == session['Username']:
+				Nickname_failure = "You already have another nickname for this channel!"
+				return render_template('join.html', Nickname_failure = Nickname_failure)
 
-		if Nickname in nicks[Channel_Name]:
-			Nickname_failure = "This nickname is already being used!"
-			return render_template('join.html', Nickname_failure = Nickname_failure)
-		else:
-		    nicks[Channel_Name].append(Nickname)
+		if not nickname_matched:
+			new_nickname = Nickname(nickname = nick, username = session['Username'], channel_name = Channel_Name)
+			db.session.add(new_nickname)
+			db.session.commit()
 		return redirect('/channel')
 
 @app.route('/log_out')
@@ -138,21 +154,17 @@ def user_panel():
 		Name = session['Name']
 		User = session['Username']
 		Channel_Name = request.form['Channel_Name']
-		Nickname = request.form['Nickname']
+		nickname = request.form['Nickname']
 		Channel_Password = request.form['Channel_Password']
 		chn = Channel.query.filter_by(Channel_Name=Channel_Name).first()
 		if chn:
 			ChannelName_failure = "Channel is already exists please choose another."
 			return render_template('user_panel.html', ChannelName_failure = ChannelName_failure)
-		else:
-		    nicks[Channel_Name] = []
-
-		if Nickname in nicks[Channel_Name]:
-			NickName_failure = "Nickname is already being used now try something else."
-			return render_template('user_panel.html',NickName_failure = NickName_failure)
-		new_channel = Channel(Username = User, Channel_Name = Channel_Name, Channel_Password = Channel_Password)
-		nicks[Channel_Name].append(Nickname)
-		session['Nickname'] = Nickname
+		new_channel = Channel(Username = User, Channel_Name = Channel_Name, Channel_Password = Channel_Password, Chat_Admin=nickname)
+		new_nickname = Nickname(nickname = nickname, username = User, channel_name = Channel_Name)
+		db.session.add(new_nickname)
+		db.session.commit()
+		session['Nickname'] = nickname
 		session['Channel_Name'] = Channel_Name
 		db.session.add(new_channel)
 		db.session.commit()
@@ -186,7 +198,6 @@ def left(message):
 	Channel_Name = session.get('Channel_Name')
 	leave_room(Channel_Name)
 	emit('status', {'msg': session.get('Nickname') + ' has left the channel.'}, room=Channel_Name)
-	nicks[Channel_Name].remove(session.get('Nickname'))
 	
 if __name__ == '__main__':
 	socketio.run(app)
