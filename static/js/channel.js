@@ -5,7 +5,7 @@
               socket.emit('joined', {});
           });
           socket.on('status', function(data) {
-              $('#chat').val($('#chat').val() + '<' + data.msg + '>\n');
+              $('#chat').val($('#chat').val() + data.msg + '\n');
               $('#chat').scrollTop($('#chat')[0].scrollHeight);
           });
           socket.on('message', function(data) {

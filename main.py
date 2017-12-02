@@ -3,6 +3,7 @@ from flask_socketio import SocketIO, send,emit, join_room, leave_room
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user
 import os
+import datetime
 
 basedir = os.path.abspath(os.path.dirname(__file__))	# Relative path for SQLAlchemy database file.
 app = Flask(__name__)
@@ -27,7 +28,6 @@ class Channel(db.Model):
 	id=db.Column(db.Integer,primary_key=True)
 	Channel_Name=db.Column(db.String(20))
 	Channel_Password=db.Column(db.String(20))
-	Username=db.Column(db.String(20))
 	Chat_Admin=db.Column(db.String(20))
 
 class Nickname(db.Model):
@@ -35,6 +35,13 @@ class Nickname(db.Model):
 	nickname=db.Column(db.String(20))
 	username=db.Column(db.String(20))
 	channel_name=db.Column(db.String(20))
+
+class Message(db.Model):
+	id=db.Column(db.Integer,primary_key=True)
+	sender=db.Column(db.String(20))
+	channel_name=db.Column(db.String(20))
+	content=db.Column(db.String(200))
+	date=db.Column(db.DateTime, default=datetime.datetime.utcnow)
 
 socketio = SocketIO(app, async_mode='gevent')	# Working with gevent mode provides keyboard interrupt with CTRL+C.
 db.create_all()		# Creates DB.
@@ -160,7 +167,7 @@ def user_panel():
 		if chn:
 			ChannelName_failure = "Channel is already exists please choose another."
 			return render_template('user_panel.html', ChannelName_failure = ChannelName_failure)
-		new_channel = Channel(Username = User, Channel_Name = Channel_Name, Channel_Password = Channel_Password, Chat_Admin=nickname)
+		new_channel = Channel(Channel_Name = Channel_Name, Channel_Password = Channel_Password, Chat_Admin=nickname)
 		new_nickname = Nickname(nickname = nickname, username = User, channel_name = Channel_Name)
 		db.session.add(new_nickname)
 		db.session.commit()
@@ -172,32 +179,43 @@ def user_panel():
 
 @app.route('/channel',methods=['GET','POST'])
 def channel():
-    print(session.get('Nickname') + " created channel " + session.get('Channel_Name'))
     Nickname = session.get('Nickname')
     Channel_Name = session.get('Channel_Name')
-    return render_template('channel.html', Nickname=Nickname, Channel_Name=Channel_Name)
+    messages=Message.query.filter_by(channel_name=Channel_Name).all()
+    messages=[str(message.date)+" "+message.sender+": "+message.content for message in messages]
+    return render_template('channel.html', Nickname=Nickname, Channel_Name=Channel_Name, messages="\n".join(messages)+"\n")
 
 @socketio.on('joined',namespace='/channel')
 def joined(message):
-    print(session.get('Nickname') + " entered the channel " + session.get('Channel_Name'))
-    Channel_Name = session.get('Channel_Name')
-    Nickname=session.get('Nickname')
-    join_room(Channel_Name)
-    emit('status', {'msg': Nickname + ' has entered the channel.'}, room=Channel_Name)
+	Channel_Name = session.get('Channel_Name')
+	Nickname=session.get('Nickname')
+	new_message=Message(sender='Server',channel_name=Channel_Name,content=Nickname + ' has entered the channel.')
+	db.session.add(new_message)
+	db.session.commit()
+	print(new_message.content +" "+ Channel_Name)
+	join_room(Channel_Name)
+	emit('status', {'msg': str(new_message.date)+" "+new_message.sender+": "+new_message.content}, room=Channel_Name)
 
 @socketio.on('text',namespace='/channel')
 def text(message):
-    print("Sent message by " + session.get('Nickname') + ": " + message['msg'])
-    Channel_Name = session.get('Channel_Name')
-    Nickname=session.get('Nickname')
-    emit('message', {'msg': Nickname + ': ' + message['msg']}, room=Channel_Name)
+	print("Sent message by " + session.get('Nickname') + ": " + message['msg'])
+	Channel_Name = session.get('Channel_Name')
+	Nickname=session.get('Nickname')
+	new_message=Message(sender=Nickname,channel_name=Channel_Name,content=message['msg'])
+	db.session.add(new_message)
+	db.session.commit()
+	emit('message', {'msg': str(new_message.date)+" "+new_message.sender+": "+new_message.content}, room=Channel_Name)
 	
 @socketio.on('left',namespace='/channel')
 def left(message):
-	print(session.get('Nickname') + " leaved the channel " + session.get('Channel_Name'))
 	Channel_Name = session.get('Channel_Name')
+	Nickname=session.get('Nickname')
+	new_message=Message(sender='Server',channel_name=Channel_Name,content=Nickname + ' has left the channel.')
+	db.session.add(new_message)
+	db.session.commit()
+	print(new_message.content+ " " + Channel_Name)
 	leave_room(Channel_Name)
-	emit('status', {'msg': session.get('Nickname') + ' has left the channel.'}, room=Channel_Name)
+	emit('status', {'msg': str(new_message.date)+" "+new_message.sender+": "+new_message.content}, room=Channel_Name)
 	
 if __name__ == '__main__':
 	socketio.run(app)

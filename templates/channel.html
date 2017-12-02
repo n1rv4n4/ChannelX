@@ -11,8 +11,10 @@
   </head>
   <body>
     <img src="/static/images/channel.png" class="col-lg-2 col-md-2 col-sm-2 col-xs-12 d-block mx-auto" alt="ChannelX">
+
     <div class="text-center form-group">
-      <textarea class="form-control" cols="149" id="chat" rows="14"></textarea> <input class="form-control" id="text" placeholder="Enter your message here." size="50">
+      <textarea class="form-control" cols="149" id="chat" rows="14">{{messages}}</textarea>
+       <input class="form-control" id="text" placeholder="Enter your message here." size="50">
       <button class="btn btn-info fixed-bottom btn-block" onclick="leave_room();" type="button">Leave this channel!</button>
     </div>
   </body>
