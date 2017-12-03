@@ -29,6 +29,10 @@ class Channel(db.Model):
 	Channel_Name=db.Column(db.String(20))
 	Channel_Password=db.Column(db.String(20))
 	Chat_Admin=db.Column(db.String(20))
+	Start_Time=db.Column(db.String(20))
+	End_Time=db.Column(db.String(20))
+	days=db.Column(db.String(100))
+
 
 class Nickname(db.Model):
 	id=db.Column(db.Integer,primary_key=True)
@@ -125,6 +129,24 @@ def join():
 		if chnn.Channel_Password != Channel_Password:
 			ChannelPassword_failure = "Channel name and password could not match!"
 			return render_template('join.html', ChannelPassword_failure = ChannelPassword_failure)
+
+		weekday=["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"][datetime.datetime.today().weekday()]
+		if weekday not in chnn.days.split(','):
+			ChannelName_failure = "Channel is not available today!"
+			return render_template('join.html', ChannelName_failure = ChannelName_failure)
+
+		now = datetime.datetime.now()
+		now=int(now.hour)*60+int(now.minute)
+		start_hour,start_min=chnn.Start_Time.split(':')
+		end_hour,end_min=chnn.End_Time.split(':')
+		if int(start_hour)*60+int(start_min) <= now < int(end_hour)*60+int(end_min):
+			pass
+		else:
+			ChannelName_failure = "Channel is not available at this time!"
+			return render_template('join.html', ChannelName_failure = ChannelName_failure)
+
+
+
 		nicknames=Nickname.query.filter_by(channel_name=Channel_Name).all()
 		nickname_matched=False
 		for nickname in nicknames:
@@ -163,11 +185,18 @@ def user_panel():
 		Channel_Name = request.form['Channel_Name']
 		nickname = request.form['Nickname']
 		Channel_Password = request.form['Channel_Password']
+		Start_Time=request.form['Start_Time']
+		End_Time=request.form['End_Time']
+		days=request.form.getlist('days')
+		#print(Start_Time,type(Start_Time))
+		#print(End_Time,type(End_Time))
+		#print(days)
+
 		chn = Channel.query.filter_by(Channel_Name=Channel_Name).first()
 		if chn:
 			ChannelName_failure = "Channel is already exists please choose another."
 			return render_template('user_panel.html', ChannelName_failure = ChannelName_failure)
-		new_channel = Channel(Channel_Name = Channel_Name, Channel_Password = Channel_Password, Chat_Admin=nickname)
+		new_channel = Channel(Channel_Name = Channel_Name, Channel_Password = Channel_Password, Chat_Admin=nickname,Start_Time=Start_Time,End_Time=End_Time,days=",".join(days))
 		new_nickname = Nickname(nickname = nickname, username = User, channel_name = Channel_Name)
 		db.session.add(new_nickname)
 		db.session.commit()
@@ -181,8 +210,15 @@ def user_panel():
 def channel():
     Nickname = session.get('Nickname')
     Channel_Name = session.get('Channel_Name')
+    chn = Channel.query.filter_by(Channel_Name=Channel_Name).first()
+    days_channel_available=chn.days.split(',')
+    start_hour,start_min=chn.Start_Time.split(':')
+    start_hour,start_min=int(start_hour),int(start_min)
+    current_date=datetime.datetime.now()
+    days=["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"]
+    start_date=datetime.datetime(current_date.year,current_date.month,current_date.day-(datetime.datetime.today().weekday()-days.index(days_channel_available[0])),start_hour,start_min)
     messages=Message.query.filter_by(channel_name=Channel_Name).all()
-    messages=[str(message.date)+" "+message.sender+": "+message.content for message in messages]
+    messages=[str(message.date)+" "+message.sender+": "+message.content for message in messages if start_date <= message.date]
     return render_template('channel.html', Nickname=Nickname, Channel_Name=Channel_Name, messages="\n".join(messages)+"\n")
 
 @socketio.on('joined',namespace='/channel')
@@ -198,7 +234,17 @@ def joined(message):
 
 @socketio.on('text',namespace='/channel')
 def text(message):
-	print("Sent message by " + session.get('Nickname') + ": " + message['msg'])
+	Channel_Name=session['Channel_Name']
+	chnn = Channel.query.filter_by(Channel_Name=Channel_Name).first()
+	now = datetime.datetime.now()
+	now=int(now.hour)*60+int(now.minute)
+	start_hour,start_min=chnn.Start_Time.split(':')
+	end_hour,end_min=chnn.End_Time.split(':')
+	if int(start_hour)*60+int(start_min) <= now < int(end_hour)*60+int(end_min):
+		print("Sent message by " + session.get('Nickname') + ": " + message['msg'])
+	else:
+		print("Channel is closed")
+		return 
 	Channel_Name = session.get('Channel_Name')
 	Nickname=session.get('Nickname')
 	new_message=Message(sender=Nickname,channel_name=Channel_Name,content=message['msg'])
