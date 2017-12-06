@@ -232,17 +232,17 @@ def channel():
 
 @app.route("/email",methods=['GET','POST'])
 def index():
-	MsgBody = "This mail is send automatically."
-	fromMsg = ('ChannelX','computerprojecttwo@gmail.com')
-	subject = 'ChannelX - New Messages'
-
-	emails = User.query.all()
-	for email in emails:
-		toMsg = "['" + email + "']"
-		msg = Message(subject, sender = fromMsg, recipients = toMsg)
-		msg.body = MsgBody
-		mail.send(msg)
-		return render_template('channel.html')
+    MsgBody = "This mail is send automatically."
+    fromMsg = ('ChannelX','computerprojecttwo@gmail.com')
+    subject = 'ChannelX - New Messages'
+    
+    emails = User.query.all()
+    for email in emails:
+        toMsg = "['" + email + "']"
+        msg = Message(subject, sender = fromMsg, recipients = toMsg)
+        msg.body = MsgBody
+        mail.send(msg)
+        return render_template('channel.html')
 
 @socketio.on('joined',namespace='/channel')
 def joined(message):

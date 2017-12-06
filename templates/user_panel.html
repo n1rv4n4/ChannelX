@@ -13,6 +13,26 @@
   <body>
     <div class="container">
       <div class="row main">
+      
+      
+      
+      <div class="col-sm-6">
+      <div class="main-login main-center">
+      <form action="{{ url_for('user_panel') }}" class="" method="POST">
+      
+      <div class="input-group">
+      <span class="input-group-addon">
+      <input type="checkbox" aria-label="Checkbox for following text input">
+      </span>
+      <input type="text" class="form-control" aria-label="Text input with checkbox">
+      </div>
+      </form>
+      </div>
+      </div>
+      
+      
+      
+      <div class="col-sm-6">
         <div class="main-login main-center">
           <form action="{{ url_for('user_panel') }}" class="" method="POST">
             <div class="form-group">
@@ -121,6 +141,7 @@
             </div>
           </form>
         </div>
+      </div>
       </div>
     </div>
   </body>
