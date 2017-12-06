@@ -1,20 +1,29 @@
 from flask import Flask, session, redirect, url_for, render_template, request
 from flask_socketio import SocketIO, send,emit, join_room, leave_room
 from flask_sqlalchemy import SQLAlchemy
+from flask_mail import Mail, Message
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user
 import os
 import datetime
 
 basedir = os.path.abspath(os.path.dirname(__file__))	# Relative path for SQLAlchemy database file.
 app = Flask(__name__)
-
+app.config.from_object(__name__)
 app.config['SECRET_KEY'] = 'ChannelX!^+%&/(()=?798465312-_*'	# Random complex key for CSRF security.
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS']= False				# Eliminates SQLAlchemy deprecation warning.
 app.config['SQLALCHEMY_DATABASE_URI']= 'sqlite:///' + os.path.join(basedir, 'database.db')
 app.config['DEBUG'] = True
+app.config['MAIL_SERVER']='smtp.gmail.com'
+app.config['MAIL_PORT'] = 465
+app.config['MAIL_USERNAME'] = 'computerprojecttwo@gmail.com'
+app.config['MAIL_PASSWORD'] = 'CProje2..'
+app.config['MAIL_USE_TLS'] = False
+app.config['MAIL_USE_SSL'] = True
 
-db=SQLAlchemy(app)
-login_manager=LoginManager()
+
+mail = Mail(app)
+db = SQLAlchemy(app)
+login_manager = LoginManager()
 login_manager.init_app(app)
 
 class User(UserMixin, db.Model):
@@ -220,6 +229,20 @@ def channel():
     messages=Message.query.filter_by(channel_name=Channel_Name).all()
     messages=[str(message.date)+" "+message.sender+": "+message.content for message in messages if start_date <= message.date]
     return render_template('channel.html', Nickname=Nickname, Channel_Name=Channel_Name, messages="\n".join(messages)+"\n")
+
+@app.route("/email",methods=['GET','POST'])
+def index():
+	MsgBody = "This mail is send automatically."
+	fromMsg = ('ChannelX','computerprojecttwo@gmail.com')
+	subject = 'ChannelX - New Messages'
+
+	emails = User.query.all()
+	for email in emails:
+		toMsg = "['" + email + "']"
+		msg = Message(subject, sender = fromMsg, recipients = toMsg)
+		msg.body = MsgBody
+		mail.send(msg)
+		return render_template('channel.html')
 
 @socketio.on('joined',namespace='/channel')
 def joined(message):
