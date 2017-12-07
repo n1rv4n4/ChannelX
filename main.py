@@ -186,34 +186,37 @@ def log_out():
 @app.route('/user_panel',methods=['GET','POST'])
 @login_required
 def user_panel():
-	if request.method == 'GET':
-		return render_template('user_panel.html')
-	else:
-		Name = session['Name']
-		User = session['Username']
-		Channel_Name = request.form['Channel_Name']
-		nickname = request.form['Nickname']
-		Channel_Password = request.form['Channel_Password']
-		Start_Time=request.form['Start_Time']
-		End_Time=request.form['End_Time']
-		days=request.form.getlist('days')
-		#print(Start_Time,type(Start_Time))
-		#print(End_Time,type(End_Time))
-		#print(days)
+        if request.method == 'GET':
+            uname=session['Name']
+            channels=Channel.query.filter_by(Chat_Admin=uname).all()
+            return render_template('user_panel.html', channels=channels)
+        else:
+            Name = session['Name']
+            User = session['Username']
+            Channel_Name = request.form['Channel_Name']
+            nickname = request.form['Nickname']
+            Channel_Password = request.form['Channel_Password']
+            Start_Time=request.form['Start_Time']
+            End_Time=request.form['End_Time']
+            days=request.form.getlist('days')
+            #print(Start_Time,type(Start_Time))
+            #print(End_Time,type(End_Time))
+            #print(days)
 
-		chn = Channel.query.filter_by(Channel_Name=Channel_Name).first()
-		if chn:
-			ChannelName_failure = "Channel is already exists please choose another."
-			return render_template('user_panel.html', ChannelName_failure = ChannelName_failure)
-		new_channel = Channel(Channel_Name = Channel_Name, Channel_Password = Channel_Password, Chat_Admin=nickname,Start_Time=Start_Time,End_Time=End_Time,days=",".join(days))
-		new_nickname = Nickname(nickname = nickname, username = User, channel_name = Channel_Name)
-		db.session.add(new_nickname)
-		db.session.commit()
-		session['Nickname'] = nickname
-		session['Channel_Name'] = Channel_Name
-		db.session.add(new_channel)
-		db.session.commit()
-		return redirect('/channel')
+        chn = Channel.query.filter_by(Channel_Name=Channel_Name).first()
+        if chn:
+            ChannelName_failure = "Channel is already exists please choose another."
+            return render_template('user_panel.html', ChannelName_failure = ChannelName_failure)
+        new_channel = Channel(Channel_Name = Channel_Name, Channel_Password = Channel_Password, Chat_Admin=nickname,Start_Time=Start_Time,End_Time=End_Time,days=",".join(days))
+        new_nickname = Nickname(nickname = nickname, username = User, channel_name = Channel_Name)
+        db.session.add(new_nickname)
+        db.session.commit()
+        session['Nickname'] = nickname
+        session['Channel_Name'] = Channel_Name
+        db.session.add(new_channel)
+        db.session.commit()
+        return redirect('/channel')
+
 
 @app.route('/channel',methods=['GET','POST'])
 def channel():
