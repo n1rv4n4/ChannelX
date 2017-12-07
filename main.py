@@ -189,10 +189,11 @@ def log_out():
 def user_panel():
         if request.method == 'GET':
             uname=session['Username']
-            print (uname, "uname")
             channels=Channel.query.filter_by(Chat_Admin=uname).all()
-            print (channels, "eklendi")
             return render_template('user_panel.html', channels=channels)
+        elif "delete" in request.form:
+            channel_id = request.form['channel id']
+            Channel.query.filter_by(id=channel_id).delete()
         else:
             Name = session['Name']
             User = session['Username']
@@ -220,6 +221,14 @@ def user_panel():
         db.session.commit()
         return redirect('/channel')
 
+@app.route('/delete_channel/<channel_id>', methods=['POST'])
+@login_required
+def delete_channel():
+    db = get_db()
+    db.execute('delete from entries where id=' + channel_id)
+    db.commit()
+    flash('Entry deleted')
+    return redirect('/user_panel')
 
 @app.route('/channel',methods=['GET','POST'])
 def channel():

@@ -45,9 +45,7 @@
     <div class="container">
       <div class="row main">
       
-      
-      
-      <div class="col-3">
+      <div class="col-4">
       <div class="main-login main-center">
       <form action="{{ url_for('user_panel') }}" class="" method="POST">
 
@@ -55,7 +53,9 @@
   			<thead class="thead-dark">
   			  <tr>
     			 <th>#</th>
-     			 <th>Channel Name</th>
+     			 <th>Channel</th>
+				 <th>Name</th>
+
   			  </tr>
   			</thead>
   			<tbody>
@@ -63,19 +63,20 @@
     		  <tr>
      			 <th scope="row">1</th>
      			 <td>{{channel.Channel_Name}}</td>
+				 <td><button id="channel_id button" class="btn btn-primary btn-block" type="submit">Delete</button></td>
+
     		  </tr>
              {% endfor %}
+
   			</tbody>
 		</table>
       </form>
       </div>
       </div>
-      
-      
-      
+            
       <div class="col-6">
         <div class="main-login main-center">
-          <form action="{{ url_for('user_panel') }}" class="" method="POST">
+          <form action="{{ url_for('user_panel') }}" class="add" method="POST">
             <div class="form-group">
               <label class="cols-sm-2 control-label" for="Nickname">Nickname</label>
               <div class="cols-sm-10">
