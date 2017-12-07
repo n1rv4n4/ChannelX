@@ -55,6 +55,8 @@
     			 <th>#</th>
      			 <th>Channel</th>
 				 <th>Name</th>
+				 <th></th>
+
 
   			  </tr>
   			</thead>
@@ -63,8 +65,8 @@
     		  <tr>
      			 <th scope="row">1</th>
      			 <td>{{channel.Channel_Name}}</td>
-				 <td><button id="channel_id button" class="btn btn-primary btn-block" type="submit">Delete</button></td>
-
+				 <td><button id="button" class="btn btn-primary btn-block enter" type="submit">Enter</button></td>
+				 <td><form id="delete" action="{{ url_for('delete_channel',channel_name=channel.Channel_Name) }}" method = "post"><input class="delete" form="delete" Value="Delete" name="delete" type="submit"></form></td>
     		  </tr>
              {% endfor %}
 

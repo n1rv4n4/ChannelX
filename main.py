@@ -184,6 +184,13 @@ def log_out():
 	print(session.get('Name') + " has logged out.")
 	return 'Logged out.'
 
+@app.route('/delete_channel/<channel_name>',methods=['GET','POST'])
+@login_required
+def delete_channel(channel_name):
+    print (channel_name)
+    Channel.query.filter_by(Channel_Name=channel_name).delete()
+    return redirect('/user_panel')
+
 @app.route('/user_panel',methods=['GET','POST'])
 @login_required
 def user_panel():
@@ -191,9 +198,6 @@ def user_panel():
             uname=session['Username']
             channels=Channel.query.filter_by(Chat_Admin=uname).all()
             return render_template('user_panel.html', channels=channels)
-        elif "delete" in request.form:
-            channel_id = request.form['channel id']
-            Channel.query.filter_by(id=channel_id).delete()
         else:
             Name = session['Name']
             User = session['Username']
@@ -220,15 +224,6 @@ def user_panel():
         db.session.add(new_channel)
         db.session.commit()
         return redirect('/channel')
-
-@app.route('/delete_channel/<channel_id>', methods=['POST'])
-@login_required
-def delete_channel():
-    db = get_db()
-    db.execute('delete from entries where id=' + channel_id)
-    db.commit()
-    flash('Entry deleted')
-    return redirect('/user_panel')
 
 @app.route('/channel',methods=['GET','POST'])
 def channel():
