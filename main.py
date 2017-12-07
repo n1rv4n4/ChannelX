@@ -175,7 +175,7 @@ def join():
 			new_nickname = Nickname(nickname = nick, username = session['Username'], channel_name = Channel_Name)
 			db.session.add(new_nickname)
 			db.session.commit()
-		return redirect('/channel')
+		return redirect('/user_panel')
 
 @app.route('/log_out')
 @login_required
@@ -189,7 +189,17 @@ def log_out():
 def delete_channel(channel_name):
     print (channel_name)
     Channel.query.filter_by(Channel_Name=channel_name).delete()
+    db.session.commit()
     return redirect('/user_panel')
+
+@app.route('/enter_channel/<channel_name>',methods=['GET','POST'])
+@login_required
+def enter_channel(channel_name):
+    print ("tugba", channel_name)
+    session['Channel_Name'] = channel_name
+    db.session.commit()
+    return redirect('/channel')
+
 
 @app.route('/user_panel',methods=['GET','POST'])
 @login_required
