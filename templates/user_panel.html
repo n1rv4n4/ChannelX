@@ -47,24 +47,33 @@
       
       
       
-      <div class="col-sm-6">
+      <div class="col-3">
       <div class="main-login main-center">
       <form action="{{ url_for('user_panel') }}" class="" method="POST">
 
-
-		<ul>
-            {% for channel in channels %}
-            <li>{{channel}}</li>
-            {% endfor %}
-        </ul>
-
+		<table class="table">
+  			<thead class="thead-dark">
+  			  <tr>
+    			 <th>#</th>
+     			 <th>Channel Name</th>
+  			  </tr>
+  			</thead>
+  			<tbody>
+			{% for channel in channels %}
+    		  <tr>
+     			 <th scope="row">1</th>
+     			 <td>{{channel.Channel_Name}}</td>
+    		  </tr>
+             {% endfor %}
+  			</tbody>
+		</table>
       </form>
       </div>
       </div>
       
       
       
-      <div class="col-sm-6">
+      <div class="col-6">
         <div class="main-login main-center">
           <form action="{{ url_for('user_panel') }}" class="" method="POST">
             <div class="form-group">

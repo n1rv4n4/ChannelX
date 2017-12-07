@@ -49,6 +49,7 @@ class Nickname(db.Model):
 	username=db.Column(db.String(20))
 	channel_name=db.Column(db.String(20))
 
+
 class Message(db.Model):
 	id=db.Column(db.Integer,primary_key=True)
 	sender=db.Column(db.String(20))
@@ -187,8 +188,10 @@ def log_out():
 @login_required
 def user_panel():
         if request.method == 'GET':
-            uname=session['Name']
+            uname=session['Username']
+            print (uname, "uname")
             channels=Channel.query.filter_by(Chat_Admin=uname).all()
+            print (channels, "eklendi")
             return render_template('user_panel.html', channels=channels)
         else:
             Name = session['Name']
