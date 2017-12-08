@@ -66,8 +66,9 @@
      			 <th scope="row"></th>
      			 <td>{{channel.Channel_Name}}</td>
 				 
-				 <td><form id="delete" action="{{ url_for('delete_channel',channel_name=channel.Channel_Name) }}" method = "post"><input class="delete" form="delete" Value="Delete" name="delete" type="submit"></form></td>
-				 <td><form id="enter" action="{{ url_for('enter_channel',channel_name=channel.Channel_Name) }}" method = "post"><input class="enter" form="enter" Value="Enter" name="enter" type="submit"></form></td>
+				 <td><form id="delete" action="{{ url_for('delete_channel',channel_id=channel.id) }}" method = "post"><input class="delete" form="delete" Value="Delete" name="delete" type="submit"></form></td>
+				<td><form id="enter" action="{{ url_for('enter_channel',channel_id=channel.id) }}" method = "post"><input class="enter" form="enter" Value="Enter" name="enter" type="submit"></form></td>
+				 
     		  </tr>
              {% endfor %}
 

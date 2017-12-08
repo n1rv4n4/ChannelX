@@ -184,19 +184,20 @@ def log_out():
 	print(session.get('Name') + " has logged out.")
 	return 'Logged out.'
 
-@app.route('/delete_channel/<channel_name>',methods=['GET','POST'])
+@app.route('/delete_channel/<channel_id>',methods=['GET','POST'])
 @login_required
-def delete_channel(channel_name):
-    print (channel_name)
-    Channel.query.filter_by(Channel_Name=channel_name).delete()
+def delete_channel(channel_id):
+    print (channel_id)
+    Channel.query.filter_by(id=channel_id).delete()
     db.session.commit()
     return redirect('/user_panel')
 
-@app.route('/enter_channel/<channel_name>',methods=['GET','POST'])
+@app.route('/enter_channel/<channel_id>',methods=['GET','POST'])
 @login_required
-def enter_channel(channel_name):
-    print ("tugba", channel_name)
-    session['Channel_Name'] = channel_name
+def enter_channel(channel_id):
+    print ("tugba", channel_id)
+    chn = Channel.query.filter_by(id=channel_id).first()
+    session['Channel_Name'] = chn.Channel_Name
     db.session.commit()
     return redirect('/channel')
 
