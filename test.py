@@ -101,12 +101,50 @@ class FlaskTestCase(BaseTestCase):
 		self.assertEqual(response.status_code, 401)
 		print("testing that users cannot reach unauthorized user_panel")
 		
-	#ensure that users cannot reach unauthorized channel
-	def test_Unauthorized_channel(self):
+	#ensure that the join page loads correctly
+	def test_join_load(self):
 		tester = app.test_client(self)
-		response = tester.get('/channel',content_type = 'html/text')
-		self.assertEqual(response.status_code, 401)
-		print("testing that users cannot reach unauthorized channel")
+		response = tester.get('/join',content_type = 'html/text')
+		self.assertEqual(response.status_code, 200)
+		print("testing that the join page loads correctly")
+		
+	#ensure join behaves correctly given the incorrect channel name
+	def test_false_Channel_Name(self):
+		tester = app.test_client(self)
+		response = tester.post('/join',data = dict(Nickname = "UnusedNick", Channel_Name = "UnusedChannel",
+			Channel_Password = "UnusedPassword"),follow_redirects = True)
+		self.assertIn(b'Sorry, channel name is not found!',response.data)
+		print("testing that join behaves correctly given the incorrect Channel Name")
+		
+	#ensure join behaves correctly given the incorrect password
+	def test_false_Channel_Password(self):
+		weekday=["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"]
+		tester = app.test_client(self)
+		tester.post('/login',data = dict(Username = "admin", Password = "password"),follow_redirects = True)
+		response = tester.post('/user_panel',
+			data = dict(Nickname = "admin", Channel_Name = "NewChannel",
+			Channel_Password = "asdfgh",Start_Time = "00:01",End_Time = "23:59",
+			days=",".join(weekday)),follow_redirects = True
+		)
+		response = tester.post('/join',data = dict(Nickname = "UnusedNick", Channel_Name = "NewChannel",
+			Channel_Password = "wrongPassword"),follow_redirects = True)
+		self.assertIn(b'Channel name and password could not match!',response.data)
+		print("testing that join behaves correctly given the incorrect password")
+		
+	#ensure join behaves correctly given the correct credential
+	def test_correct_join(self):
+		weekday=["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"]
+		tester = app.test_client(self)
+		tester.post('/login',data = dict(Username = "admin", Password = "password"),follow_redirects = True)
+		response = tester.post('/user_panel',
+			data = dict(Nickname = "admin", Channel_Name = "NewChannel",
+			Channel_Password = "asdfgh",Start_Time = "00:01",End_Time = "23:59",
+			days=",".join(weekday)),follow_redirects = True
+		)
+		response = tester.post('/join',data = dict(Nickname = "admin", Channel_Name = "NewChannel",
+			Channel_Password = "asdfgh"),follow_redirects = True)
+		self.assertIn(b'Leave this channel!',response.data)
+		print("testing that join behaves correctly given the correct credential")
 		
 if __name__ == '__main__':
 	unittest.main()
