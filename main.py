@@ -175,7 +175,7 @@ def join():
 			new_nickname = Nickname(nickname = nick, username = session['Username'], channel_name = Channel_Name)
 			db.session.add(new_nickname)
 			db.session.commit()
-		return redirect('/user_panel')
+		return redirect('/channel')
 
 @app.route('/log_out')
 @login_required
@@ -184,10 +184,9 @@ def log_out():
 	print(session.get('Name') + " has logged out.")
 	return 'Logged out.'
 
-@app.route('/delete_channel/<channel_id>',methods=['GET','POST'])
+@app.route('/delete_channel/<channel_id>',methods=['POST'])
 @login_required
 def delete_channel(channel_id):
-    print (channel_id)
     Channel.query.filter_by(id=channel_id).delete()
     db.session.commit()
     return redirect('/user_panel')
@@ -195,9 +194,9 @@ def delete_channel(channel_id):
 @app.route('/enter_channel/<channel_id>',methods=['GET','POST'])
 @login_required
 def enter_channel(channel_id):
-    print ("tugba", channel_id)
     chn = Channel.query.filter_by(id=channel_id).first()
     session['Channel_Name'] = chn.Channel_Name
+    session['Nickname'] = Nickname.query.filter_by(channel_name=session['Channel_Name'],username=session['Username']).first().nickname
     db.session.commit()
     return redirect('/channel')
 
@@ -208,25 +207,22 @@ def user_panel():
         if request.method == 'GET':
             uname=session['Username']
             channels=Channel.query.filter_by(Chat_Admin=uname).all()
+            print(channels)
             return render_template('user_panel.html', channels=channels)
-        else:
-            Name = session['Name']
-            User = session['Username']
-            Channel_Name = request.form['Channel_Name']
-            nickname = request.form['Nickname']
-            Channel_Password = request.form['Channel_Password']
-            Start_Time=request.form['Start_Time']
-            End_Time=request.form['End_Time']
-            days=request.form.getlist('days')
-            #print(Start_Time,type(Start_Time))
-            #print(End_Time,type(End_Time))
-            #print(days)
-
+        
+        Name = session['Name']
+        User = session['Username']
+        Channel_Name = request.form['Channel_Name']
+        nickname = request.form['Nickname']
+        Channel_Password = request.form['Channel_Password']
+        Start_Time=request.form['Start_Time']
+        End_Time=request.form['End_Time']
+        days=request.form.getlist('days')
         chn = Channel.query.filter_by(Channel_Name=Channel_Name).first()
-        if chn:
-            ChannelName_failure = "Channel is already exists please choose another."
+        if chn:        		
+            ChannelName_failure="Channel is already exists please choose another."
             return render_template('user_panel.html', ChannelName_failure = ChannelName_failure)
-        new_channel = Channel(Channel_Name = Channel_Name, Channel_Password = Channel_Password, Chat_Admin=nickname,Start_Time=Start_Time,End_Time=End_Time,days=",".join(days))
+        new_channel = Channel(Channel_Name = Channel_Name, Channel_Password = Channel_Password, Chat_Admin=User,Start_Time=Start_Time,End_Time=End_Time,days=",".join(days))
         new_nickname = Nickname(nickname = nickname, username = User, channel_name = Channel_Name)
         db.session.add(new_nickname)
         db.session.commit()
