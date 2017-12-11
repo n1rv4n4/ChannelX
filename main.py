@@ -184,10 +184,11 @@ def log_out():
 	print(session.get('Name') + " has logged out.")
 	return 'Logged out.'
 
-@app.route('/delete_channel/<channel_id>',methods=['POST'])
+@app.route('/delete_channel/<channel_id>',methods=['GET','POST'])
 @login_required
 def delete_channel(channel_id):
     Channel.query.filter_by(id=channel_id).delete()
+    session['Nickname'] = Nickname.query.filter_by(channel_name=session['Channel_Name'],username=session['Username']).first().nickname
     db.session.commit()
     return redirect('/user_panel')
 
