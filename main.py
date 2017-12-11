@@ -245,7 +245,7 @@ def channel():
     days=["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"]
     start_date=datetime.datetime(current_date.year,current_date.month,current_date.day-(datetime.datetime.today().weekday()-days.index(days_channel_available[0])),start_hour,start_min)
     messages=Message.query.filter_by(channel_name=Channel_Name).all()
-    messages=[str(message.date)+" "+message.sender+": "+message.content for message in messages if start_date <= message.date]
+    messages=[str(message.date)+" "+message.sender+": "+message.content for message in messages if (start_date <= message.date) or (chn.Chat_Admin == session['Username'])]
     return render_template('channel.html', Nickname=Nickname, Channel_Name=Channel_Name, messages="\n".join(messages)+"\n")
 
 @app.route("/email",methods=['GET','POST'])
