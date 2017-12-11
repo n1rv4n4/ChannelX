@@ -12,6 +12,7 @@ app.config.from_object(__name__)
 app.config['SECRET_KEY'] = 'ChannelX!^+%&/(()=?798465312-_*'	# Random complex key for CSRF security.
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS']= False				# Eliminates SQLAlchemy deprecation warning.
 app.config['SQLALCHEMY_DATABASE_URI']= 'sqlite:///' + os.path.join(basedir, 'database.db')
+
 app.config['MAIL_SERVER']='smtp.gmail.com'
 app.config['MAIL_PORT'] = 465
 app.config['MAIL_USERNAME'] = 'computerprojecttwo@gmail.com'
@@ -129,6 +130,10 @@ def join():
 		nick = request.form['Nickname']
 		session['Channel_Name'] = Channel_Name
 		session['Nickname'] = nick
+		try:
+			username=session['Username']
+		except:
+			username=session['Username']="guest"
 
 		chnn = Channel.query.filter_by(Channel_Name=Channel_Name).first()
 		if not chnn:
@@ -166,7 +171,7 @@ def join():
 				else:
 					Nickname_failure = "This nickname is already being used by another user!"
 					return render_template('join.html', Nickname_failure = Nickname_failure)
-			elif nickname.username == session['Username']:
+			elif (nickname.username == session['Username']) and (session['Username'] != "guest"):
 				Nickname_failure = "You already have another nickname for this channel!"
 				return render_template('join.html', Nickname_failure = Nickname_failure)
 
@@ -233,7 +238,6 @@ def user_panel():
         return redirect('/channel')
 
 @app.route('/channel',methods=['GET','POST'])
-@login_required
 def channel():
     Nickname = session.get('Nickname')
     Channel_Name = session.get('Channel_Name')
