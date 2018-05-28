@@ -1,4 +1,3 @@
-Python 2.7 or 3.6
 Flask
 Flask-Login
 Flask-SocketIO
@@ -6,4 +5,3 @@ Flask-Mail
 SQLAlchemy
 SQLite3
 Gevent
-Bootstrap 4.0.0 and 3.3.7
